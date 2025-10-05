@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu Sales Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+        }
+
+        .panel {
+            background: #1a1a1a;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .panel h2 {
+            color: #3498db;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #2c2c2c;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            border: 1px solid #3a3a3a;
+        }
+
+        .menu-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+            border-color: #3498db;
+        }
+
+        .item-info {
+            flex: 1;
+        }
+
+        .item-name {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #ecf0f1;
+        }
+
+        .item-price {
+            color: #2ecc71;
+            font-size: 1em;
+            margin-top: 5px;
+        }
+
+        .add-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .add-btn:hover {
+            background: #2980b9;
+            transform: scale(1.05);
+        }
+
+        .current-bill {
+            background: #2c2c2c;
+            border: 2px solid #f39c12;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .bill-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .bill-number {
+            font-weight: bold;
+            color: #3498db;
+            font-size: 1.2em;
+        }
+
+        .bill-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 8px;
+            background: #1a1a1a;
+            border-radius: 8px;
+            border-left: 3px solid #f39c12;
+            color: #ecf0f1;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .qty-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .qty-btn:hover {
+            background: #2980b9;
+            transform: scale(1.1);
+        }
+
+        .qty-display {
+            min-width: 30px;
+            text-align: center;
+            font-weight: bold;
+            color: #f39c12;
+        }
+
+        .item-subtotal {
+            color: #2ecc71;
+            font-weight: bold;
+            min-width: 60px;
+            text-align: right;
+        }
+
+        .bill-total {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            margin-top: 10px;
+            background: #3498db;
+            color: white;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .bill-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .complete-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .complete-btn:hover {
+            background: #218838;
+        }
+
+        .print-receipt {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            margin-left: 10px;
+        }
+
+        .print-receipt:hover {
+            background: #0056b3;
+        }
+
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .receipt-print, .receipt-print * {
+                visibility: visible;
+            }
+            .receipt-print {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 85mm;
+            }
+        }
+
+        .receipt-print {
+            display: none;
+            font-family: 'Courier New', monospace;
+            width: 85mm;
+            padding: 5mm;
+            font-size: 12px;
+            line-height: 1.4;
+            font-weight: bold;
+        }
+
+        .receipt-print.printing {
+            display: block;
+        }
+
+        .receipt-header {
+            text-align: center;
+            border-bottom: 1px dashed #000;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .receipt-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .receipt-items {
+            border-bottom: 1px dashed #000;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .receipt-item-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        .receipt-item-name {
+            flex: 1;
+            font-weight: bold;
+        }
+
+        .receipt-item-qty {
+            min-width: 35px;
+            text-align: center;
+            margin: 0 5px;
+            font-weight: bold;
+        }
+
+        .receipt-item-price {
+            min-width: 60px;
+            text-align: right;
+            font-weight: bold;
+        }
+
+        .receipt-footer {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .clear-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .clear-btn:hover {
+            background: #c82333;
+        }
+
+        .undo-btn {
+            background: #ff9800;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .undo-btn:hover {
+            background: #e68900;
+        }
+
+        .completed-bill {
+            background: #2c2c2c;
+            border: 2px solid #2ecc71;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .completed-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .delete-bill-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.3s ease;
+        }
+
+        .delete-bill-btn:hover {
+            background: #c0392b;
+        }
+
+        .bill-time {
+            font-size: 0.85em;
+            color: #95a5a6;
+        }
+
+        .completed-item {
+            padding: 8px;
+            margin-bottom: 5px;
+            background: #1a1a1a;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            color: #ecf0f1;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .stat-box {
+            text-align: center;
+            padding: 15px;
+            background: #2c2c2c;
+            border-radius: 10px;
+            border: 1px solid #3a3a3a;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #95a5a6;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        .download-btn {
+            width: 100%;
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+
+        .download-btn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40,167,69,0.3);
+        }
+
+        .clear-data-btn {
+            width: 100%;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .clear-data-btn:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231,76,60,0.3);
+        }
+
+        .empty-message {
+            text-align: center;
+            color: #7f8c8d;
+            padding: 30px;
+            font-style: italic;
+        }
+
+        .scrollable {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .scrollable::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .scrollable::-webkit-scrollbar-track {
+            background: #2c2c2c;
+            border-radius: 10px;
+        }
+
+        .scrollable::-webkit-scrollbar-thumb {
+            background: #3498db;
+            border-radius: 10px;
+        }
+
+        @media (max-width: 1024px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍽️ Menu Sales Tracker</h1>
+        
+        <div class="content">
+            <!-- Menu Panel -->
+            <div class="panel">
+                <h2>Menu Items</h2>
+                <div class="scrollable" id="menuList"></div>
+            </div>
+
+            <!-- Current Bill Panel -->
+            <div class="panel">
+                <h2>Current Bill</h2>
+                <div id="currentBillSection">
+                    <div class="empty-message">Add items to start a new bill</div>
+                </div>
+            </div>
+
+            <!-- Completed Bills Panel -->
+            <div class="panel">
+                <h2>Completed Bills</h2>
+                <div class="stats">
+                    <div class="stat-box">
+                        <div class="stat-label">Total Bills</div>
+                        <div class="stat-value" id="totalBills">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Total Revenue</div>
+                        <div class="stat-value" id="totalRevenue">₹0</div>
+                    </div>
+                </div>
+                <div class="scrollable" id="completedBillsList">
+                    <div class="empty-message">No completed bills yet</div>
+                </div>
+                <button class="download-btn" onclick="downloadSalesReport()">📥 Download Sales Report</button>
+                <button class="clear-data-btn" onclick="clearAllData()">🗑️ Clear All Data</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample menu items
+        const menuItems = [
+            { id: 1, name: 'Potato Cheese Shots', price: 80 },
+            { id: 2, name: 'Chicken Nuggets', price: 100 },
+            { id: 3, name: 'Chicken Momos', price: 80 },
+            { id: 4, name: 'Meat Cutlet', price: 90 },
+            { id: 5, name: 'Meat Masala & Idli', price: 120 },
+            { id: 6, name: 'Chicken Tikka', price: 80 },
+            { id: 7, name: 'Chicken Kabab', price: 160 },
+            { id: 8, name: 'French Fries', price: 60 },
+            { id: 9, name: 'Chi. Sheek Kabab', price: 100 }
+        ];
+
+        let currentBill = [];
+        let completedBills = [];
+        let billCounter = 1;
+
+        // Load data on startup
+        function loadData() {
+            const savedBills = JSON.parse(localStorage.getItem('completedBills') || '[]');
+            const savedCounter = parseInt(localStorage.getItem('billCounter') || '1');
+            const savedCurrentBill = JSON.parse(localStorage.getItem('currentBill') || '[]');
+            
+            completedBills = savedBills;
+            billCounter = savedCounter;
+            currentBill = savedCurrentBill;
+        }
+
+        // Save data
+        function saveData() {
+            localStorage.setItem('completedBills', JSON.stringify(completedBills));
+            localStorage.setItem('billCounter', billCounter.toString());
+            localStorage.setItem('currentBill', JSON.stringify(currentBill));
+        }
+
+        // Initialize menu
+        function initMenu() {
+            const menuList = document.getElementById('menuList');
+            menuList.innerHTML = menuItems.map(item => `
+                <div class="menu-item">
+                    <div class="item-info">
+                        <div class="item-name">${item.name}</div>
+                        <div class="item-price">₹${item.price}</div>
+                    </div>
+                    <button class="add-btn" onclick="addToBill(${item.id})">+ Add</button>
+                </div>
+            `).join('');
+        }
+
+        // Add item to current bill
+        function addToBill(itemId) {
+            const item = menuItems.find(m => m.id === itemId);
+            
+            const existingItem = currentBill.find(i => i.id === itemId);
+            if (existingItem) {
+                existingItem.quantity++;
+            } else {
+                currentBill.push({ ...item, quantity: 1 });
+            }
+            
+            updateCurrentBill();
+            saveData();
+        }
+
+        // Update quantity
+        function updateQuantity(index, change) {
+            currentBill[index].quantity += change;
+            
+            if (currentBill[index].quantity <= 0) {
+                currentBill.splice(index, 1);
+            }
+            
+            updateCurrentBill();
+            saveData();
+        }
+
+        // Remove last item from bill (undo)
+        function undoLastItem() {
+            if (currentBill.length > 0) {
+                const lastItem = currentBill[currentBill.length - 1];
+                if (lastItem.quantity > 1) {
+                    lastItem.quantity--;
+                } else {
+                    currentBill.pop();
+                }
+                updateCurrentBill();
+                saveData();
+            }
+        }
+
+        // Clear current bill
+        function clearBill() {
+            if (currentBill.length > 0 && confirm('Are you sure you want to clear this bill?')) {
+                currentBill = [];
+                updateCurrentBill();
+                saveData();
+            }
+        }
+
+        // Update current bill display
+        function updateCurrentBill() {
+            const section = document.getElementById('currentBillSection');
+            
+            if (currentBill.length === 0) {
+                section.innerHTML = '<div class="empty-message">Add items to start a new bill</div>';
+                return;
+            }
+
+            const total = currentBill.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            
+            section.innerHTML = `
+                <div class="current-bill">
+                    <div class="bill-header">
+                        <div class="bill-number">Bill #${billCounter}</div>
+                        <button class="undo-btn" onclick="undoLastItem()">↶ Undo Last</button>
+                    </div>
+                    ${currentBill.map((item, index) => `
+                        <div class="bill-item">
+                            <div class="item-name" style="flex: 1;">${item.name}</div>
+                            <div class="quantity-controls">
+                                <button class="qty-btn" onclick="updateQuantity(${index}, -1)">-</button>
+                                <div class="qty-display">${item.quantity}</div>
+                                <button class="qty-btn" onclick="updateQuantity(${index}, 1)">+</button>
+                            </div>
+                            <div class="item-subtotal">₹${item.price * item.quantity}</div>
+                        </div>
+                    `).join('')}
+                    <div class="bill-total">
+                        <span>Total</span>
+                        <span>₹${total}</span>
+                    </div>
+                    <div class="bill-actions">
+                        <button class="complete-btn" onclick="completeBill()">✓ Complete Bill</button>
+                        <button class="clear-btn" onclick="clearBill()">✕ Clear Bill</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Print receipt
+        function printReceipt(bill) {
+            const receiptHTML = `
+                <div class="receipt-print printing" id="receiptToPrint">
+                    <div class="receipt-header">
+                        <div class="receipt-title">YCJ HARVEST STALL</div>
+                    </div>
+                    
+                    <div style="margin: 10px 0;">
+                        <div><strong>Bill #${bill.number}</strong></div>
+                        <div>${bill.completedAt}</div>
+                    </div>
+                    
+                    <div class="receipt-items">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 11px;">
+                            <strong style="flex: 1;">Item</strong>
+                            <strong style="width: 35px; text-align: center;">Qty</strong>
+                            <strong style="width: 60px; text-align: right;">Price</strong>
+                        </div>
+                        ${bill.items.map(item => `
+                            <div class="receipt-item-row">
+                                <span class="receipt-item-name">${item.name}</span>
+                                <span class="receipt-item-qty">x${item.quantity}</span>
+                                <span class="receipt-item-price">₹${(item.price * item.quantity).toFixed(2)}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <div class="receipt-item-row" style="font-size: 16px; font-weight: bold; margin-bottom: 10px;">
+                        <span>TOTAL:</span>
+                        <span></span>
+                        <span>₹${bill.total.toFixed(2)}</span>
+                    </div>
+                    
+                    <div class="receipt-footer">
+                        <div>Thank you for your visit!</div>
+                        <div>Please come again</div>
+                    </div>
+                </div>
+            `;
+            
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = receiptHTML;
+            document.body.appendChild(tempDiv);
+            
+            window.print();
+            
+            setTimeout(() => {
+                document.body.removeChild(tempDiv);
+            }, 100);
+        }
+
+        // Complete and save bill
+        function completeBill() {
+            if (currentBill.length === 0) return;
+
+            const bill = {
+                number: billCounter,
+                items: [...currentBill],
+                total: currentBill.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+                completedAt: new Date().toLocaleString()
+            };
+
+            completedBills.push(bill);
+            
+            printReceipt(bill);
+            
+            billCounter++;
+            currentBill = [];
+            
+            updateCurrentBill();
+            updateCompletedBills();
+            updateStats();
+            saveData();
+        }
+
+        // Update completed bills display
+        function updateCompletedBills() {
+            const list = document.getElementById('completedBillsList');
+            
+            if (completedBills.length === 0) {
+                list.innerHTML = '<div class="empty-message">No completed bills yet</div>';
+                return;
+            }
+
+            list.innerHTML = completedBills.map((bill, billIndex) => `
+                <div class="completed-bill">
+                    <div class="completed-header">
+                        <div class="bill-number">Bill #${bill.number}</div>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <div class="bill-time">${bill.completedAt}</div>
+                            <button class="print-receipt" onclick="printReceipt(completedBills[${billIndex}])">🖨️ Print</button>
+                            <button class="delete-bill-btn" onclick="deleteBill(${billIndex})">🗑️ Delete</button>
+                        </div>
+                    </div>
+                    ${bill.items.map(item => `
+                        <div class="completed-item">
+                            <span>${item.name} x${item.quantity}</span>
+                            <span>₹${(item.price * item.quantity).toFixed(2)}</span>
+                        </div>
+                    `).join('')}
+                    <div class="bill-total">
+                        <span>Total</span>
+                        <span>₹${bill.total.toFixed(2)}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Delete a completed bill
+        function deleteBill(billIndex) {
+            if (confirm('Are you sure you want to delete this bill?')) {
+                completedBills.splice(billIndex, 1);
+                updateCompletedBills();
+                updateStats();
+                saveData();
+            }
+        }
+
+        // Clear all data
+        function clearAllData() {
+            if (confirm('⚠️ WARNING: This will delete ALL bills and reset everything!\n\nAre you absolutely sure?')) {
+                if (confirm('This action cannot be undone. Continue?')) {
+                    localStorage.clear();
+                    currentBill = [];
+                    completedBills = [];
+                    billCounter = 1;
+                    updateCurrentBill();
+                    updateCompletedBills();
+                    updateStats();
+                    alert('✅ All data has been cleared!');
+                }
+            }
+        }
+
+        // Update statistics
+        function updateStats() {
+            const totalBills = completedBills.length;
+            const totalRevenue = completedBills.reduce((sum, bill) => sum + bill.total, 0);
+            
+            document.getElementById('totalBills').textContent = totalBills;
+            document.getElementById('totalRevenue').textContent = `₹${totalRevenue}`;
+        }
+
+        // Download sales report as CSV
+        function downloadSalesReport() {
+            if (completedBills.length === 0) {
+                alert('No completed bills to download yet!');
+                return;
+            }
+
+            const itemTotals = {};
+            completedBills.forEach(bill => {
+                bill.items.forEach(item => {
+                    if (!itemTotals[item.name]) {
+                        itemTotals[item.name] = { count: 0, revenue: 0 };
+                    }
+                    itemTotals[item.name].count += item.quantity;
+                    itemTotals[item.name].revenue += (item.price * item.quantity);
+                });
+            });
+
+            let csv = 'Bill Number,Item Name,Quantity,Unit Price,Subtotal,Bill Total,Date & Time\n';
+            
+            completedBills.forEach(bill => {
+                bill.items.forEach((item, index) => {
+                    csv += `"Bill #${bill.number}","${item.name}",${item.quantity},"₹${item.price}","₹${item.price * item.quantity}",`;
+                    if (index === 0) {
+                        csv += `"₹${bill.total}","${bill.completedAt}"\n`;
+                    } else {
+                        csv += `"",""\n`;
+                    }
+                });
+            });
+
+            const totalRevenue = completedBills.reduce((sum, bill) => sum + bill.total, 0);
+            csv += `\n=== SUMMARY ===\n`;
+            csv += `Total Bills,${completedBills.length}\n`;
+            csv += `Total Revenue,₹${totalRevenue}\n`;
+            
+            csv += `\n=== ITEM BREAKDOWN ===\n`;
+            csv += `Item Name,Quantity Sold,Total Revenue\n`;
+            Object.entries(itemTotals)
+                .sort((a, b) => b[1].count - a[1].count)
+                .forEach(([itemName, data]) => {
+                    csv += `"${itemName}",${data.count},"₹${data.revenue}"\n`;
+                });
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `sales_report_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+
+        // Initialize on load
+        loadData();
+        initMenu();
+        updateCurrentBill();
+        updateCompletedBills();
+        updateStats();
+    </script>
+</body>
+</html>
